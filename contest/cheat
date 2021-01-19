@@ -1,0 +1,347 @@
+#include<bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update> ordered_set;
+#define int long long
+#define float  long double
+#define pb push_back
+#define ld long double
+#define mp          make_pair
+#define pii         pair<int,int>
+#define vi          vector<int>
+#define all(a)      (a).begin(),(a).end()
+#define debug(x)    cout<<#x<<(x)<<endl;
+#define mp make_pair
+#define x first
+#define y second
+#define pb push_back
+#define SZ(x) (int((x).size()))
+#define ALL(x) (x).begin(), (x).end()
+#define IOS ios::sync_with_stdio(0); cin.tie(0); cout.tie(0);
+#define txt freopen("input.txt", "r", stdin); freopen("output.txt", "w", stdout);
+
+ordered_set{
+#include <ext/pb_ds/assoc_container.hpp> 
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace std; 
+using namespace __gnu_pbds;
+template <typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+}
+
+struct LCA {
+    vector<int> height, euler, first, segtree;
+    vector<bool> visited;
+    int n;
+
+    LCA(vector<vector<int>> &adj, int root = 0) {
+        n = adj.size();
+        height.resize(n);
+        first.resize(n);
+        euler.reserve(n * 2);
+        visited.assign(n, false);
+        dfs(adj, root);
+        int m = euler.size();
+        segtree.resize(m * 4);
+        build(1, 0, m - 1);
+    }
+
+    void dfs(vector<vector<int>> &adj, int node, int h = 0) {
+        visited[node] = true;
+        height[node] = h;
+        first[node] = euler.size();
+        euler.push_back(node);
+        for (auto to : adj[node]) {
+            if (!visited[to]) {
+                dfs(adj, to, h + 1);
+                euler.push_back(node);
+            }
+        }
+    }
+
+    void build(int node, int b, int e) {
+        if (b == e) {
+            segtree[node] = euler[b];
+        } else {
+            int mid = (b + e) / 2;
+            build(node << 1, b, mid);
+            build(node << 1 | 1, mid + 1, e);
+            int l = segtree[node << 1], r = segtree[node << 1 | 1];
+            segtree[node] = (height[l] < height[r]) ? l : r;
+        }
+    }
+
+    int query(int node, int b, int e, int L, int R) {
+        if (b > R || e < L)
+            return -1;
+        if (b >= L && e <= R)
+            return segtree[node];
+        int mid = (b + e) >> 1;
+
+        int left = query(node << 1, b, mid, L, R);
+        int right = query(node << 1 | 1, mid + 1, e, L, R);
+        if (left == -1) return right;
+        if (right == -1) return left;
+        return height[left] < height[right] ? left : right;
+    }
+
+    int lca(int u, int v) {
+        int left = first[u], right = first[v];
+        if (left > right)
+            swap(left, right);
+        return query(1, 0, euler.size() - 1, left, right);
+    }
+};
+//comparator
+struct Compare {
+    const bool operator()(pair<int, int> const & a,
+                              pair<int, int> const & b) const
+    { return a.first < b.first || (a.first==b.first && a.second>b.second) ; }
+};
+
+
+fenwick tree{
+
+
+
+const int MAXN=200005;
+int fen[MAXN];
+void add(int k, int val)
+{
+    for (int i = k ; i <=MAXN; i |= i +1) 
+    {
+        fen[i] += val;
+    }
+}
+
+int get(int k)
+{
+    int ans = 0;
+    for (int i = k; i >= 0; i = (i & (i + 1)) - 1)
+	 ans += fen[i];
+    return ans;
+}
+
+int sum(int x, int y)
+{
+    return get(y) - get(x);
+}
+
+
+
+}
+int modInverse(int a,int m) 
+{ 
+    
+    int m0 = m; 
+    int y = 0, x = 1; 
+  
+    if (m == 1) 
+      return 0; 
+  
+    while (a > 1) 
+    { 
+        // q is quotient 
+        int q = a / m; 
+        int t = m; 
+  
+        // m is remainder now, process same as 
+        // Euclid's algo 
+        m = a % m, a = t; 
+        t = y; 
+  
+        // Update y and x 
+        y = x - q * y; 
+        x = t; 
+    } 
+  
+    // Make x positive 
+    if (x < 0) 
+       x += m0; 
+  
+    return x; 
+} 
+
+vector<int>primes;
+vector<int> prefix_function(string s) {
+    int n = (int)s.length();
+    vector<int> pi(n);
+    pi[0]=0;
+    for (int i = 1; i < n; i++) {
+        int j = pi[i-1];
+        while (j > 0 && s[i] != s[j])
+            j = pi[j-1];
+        if (s[i] == s[j])
+            j++;
+        pi[i] = j;
+    }
+    return pi;
+}
+void primef(int n,vector<int> &pf)
+{
+    if(n%2==0)
+    {
+        pf.pb(2);
+        while(n%2==0) n/=2;
+    }
+    for(int i=3;i<=sqrt(n);i+=2)
+    {
+        if(n%i==0)
+            pf.pb(i);
+        while(n%i==0) n/=i;
+    }
+    if(n>2) pf.pb(n);
+}
+int etf(int n)
+{
+    primef(n,v);
+    int mul=n;
+    for(int k:v)
+    {
+        mul-=mul/k;
+    }
+
+     return mul;
+}
+int modexp(int x,  int y)
+{
+    int res = 1;
+ 
+    x = x % mod;
+ 
+ 
+    if (x == 0) return 0;
+ 
+    while (y > 0)
+    {
+ 
+        if (y & 1)
+            res = (res*x) % mod;
+        y = y>>1;
+        x = (x*x) % mod;
+    }
+    return res;
+}
+ll binPow(ll a, ll q, ll MOD) {
+    a %= MOD;
+    if (q == 0) return 1;
+    return ((q % 2 == 1 ? a : 1) * binPow(a * a, q / 2, MOD)) % MOD;
+}
+
+void dtob(int n,vector<int> &v)
+{
+  while(n>0)
+  {
+      v.pb(n%2);
+      n/=2;
+  }
+}
+bool sasc( pair<pair<int,int>,int> p1, pair<pair<int,int>,int> p2)
+{
+    if(p1.x.x==p2.x.x)
+        return p1.x.y<p2.x.y;
+    return p1.x.x<p2.x.x;
+}
+void soe(int n,vector<int> &primes)
+{
+
+bool prime[n+1];
+    memset(prime, true, sizeof(prime));
+
+    for (int p=2; p*p<=n; p++)
+    {
+        if (prime[p] == true)
+        {
+            for (int i=p*p; i<=n; i += p)
+                prime[i] = false;
+        }
+    }
+    for (int p=2; p<=n; p++)
+       if (prime[p])
+        primes.pb(p);
+
+}
+
+void find_digits(int n,vector<int> &v){ while(n>0) { v.pb(n%10); n/=10;  } }
+
+int mncpr(int n, int r, int p)
+{
+    int C[r+1];
+    memset(C, 0, sizeof(C));
+
+    C[0] = 1;
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = min(i, r); j > 0; j--)
+
+            C[j] = (C[j] + C[j-1])%p;
+    }
+
+    return C[r];
+}
+string stoi(int n)
+{
+    string s="";
+    while(n>0)
+    {
+        int k=n%10;
+        n/=10;
+    char a=char(k+'0');
+    s=a+s;
+    }
+    return s;
+
+}
+{
+//Fermat
+
+int power(int x,  int y, int p)
+{
+    int res = 1; 
+ 
+    x = x % p; 
+ 
+    while (y > 0) 
+    {
+     
+        if (y & 1)
+            res = (res * x) % p;
+ 
+        y = y >> 1; // y = y/2
+        x = (x * x) % p;
+    }
+    return res;
+}
+ 
+int modInverse(int n, int p)
+{
+    return power(n, p - 2, p);
+}
+ 
+int ncr(int n,int r, int p)
+{
+    if (n < r)
+        return 0;
+    if (r == 0)
+        return 1;
+ 
+    int fac[n + 1];
+    fac[0] = 1;
+    for (int i = 1; i <= n; i++)
+        fac[i] = (fac[i - 1] * i) % p;
+ 
+    return (fac[n] * modInverse(fac[r], p) % p
+            * modInverse(fac[n - r], p) % p)
+           % p;
+}
+
+
+}
+
+
+
+
